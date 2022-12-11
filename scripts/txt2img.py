@@ -13,6 +13,7 @@ import time
 from pytorch_lightning import seed_everything
 from torch import autocast
 from contextlib import contextmanager, nullcontext
+from random import randint
 
 from ldm.util import instantiate_from_config
 from ldm.models.diffusion.ddim import DDIMSampler
@@ -85,19 +86,20 @@ def load_replacement(x):
         return x
 
 
-def check_safety(x_image):
-    safety_checker_input = safety_feature_extractor(numpy_to_pil(x_image), return_tensors="pt")
-    x_checked_image, has_nsfw_concept = safety_checker(images=x_image, clip_input=safety_checker_input.pixel_values)
-    assert x_checked_image.shape[0] == len(has_nsfw_concept)
-    for i in range(len(has_nsfw_concept)):
-        if has_nsfw_concept[i]:
-            x_checked_image[i] = load_replacement(x_checked_image[i])
-    return x_checked_image, has_nsfw_concept
+def check_safety(nsfw_filter_switch, x_image):
+    if nsfw_filter_switch:
+        safety_checker_input = safety_feature_extractor(numpy_to_pil(x_image), return_tensors="pt")
+        x_checked_image, has_nsfw_concept = safety_checker(images=x_image, clip_input=safety_checker_input.pixel_values)
+        assert x_checked_image.shape[0] == len(has_nsfw_concept)
+        for i in range(len(has_nsfw_concept)):
+            if has_nsfw_concept[i]:
+                x_checked_image[i] = load_replacement(x_checked_image[i])
+        return x_checked_image, has_nsfw_concept
+    else:
+        return x_image, False
 
 
-def main():
-    parser = argparse.ArgumentParser()
-
+def read_prompt_parameter(parser):
     parser.add_argument(
         "--prompt",
         type=str,
@@ -105,6 +107,9 @@ def main():
         default="a painting of a virus monster playing guitar",
         help="the prompt to render"
     )
+
+
+def read_outdir_parameter(parser):
     parser.add_argument(
         "--outdir",
         type=str,
@@ -112,119 +117,182 @@ def main():
         help="dir to write results to",
         default="outputs/txt2img-samples"
     )
+
+
+def read_skip_grid_parameter(parser):
     parser.add_argument(
         "--skip_grid",
         action='store_true',
         help="do not save a grid, only individual samples. Helpful when evaluating lots of samples",
     )
+
+
+def read_skip_save_parameter(parser):
     parser.add_argument(
         "--skip_save",
         action='store_true',
         help="do not save individual samples. For speed measurements.",
     )
+
+
+def read_ddim_steps_parameter(parser):
     parser.add_argument(
         "--ddim_steps",
         type=int,
         default=50,
         help="number of ddim sampling steps",
     )
+
+
+def read_plms_parameter(parser):
     parser.add_argument(
         "--plms",
         action='store_true',
         help="use plms sampling",
     )
+
+
+def read_dpm_solver_parameter(parser):
     parser.add_argument(
         "--dpm_solver",
         action='store_true',
         help="use dpm_solver sampling",
     )
+
+
+def read_laion400m_parameter(parser):
     parser.add_argument(
         "--laion400m",
         action='store_true',
         help="uses the LAION400M model",
     )
+
+
+def read_fixed_code_parameter(parser):
     parser.add_argument(
         "--fixed_code",
         action='store_true',
         help="if enabled, uses the same starting code across samples ",
     )
+
+
+def read_ddim_eta_parameter(parser):
     parser.add_argument(
         "--ddim_eta",
         type=float,
         default=0.0,
         help="ddim eta (eta=0.0 corresponds to deterministic sampling",
     )
+
+
+def read_n_iter_parameter(parser):
     parser.add_argument(
         "--n_iter",
         type=int,
         default=2,
         help="sample this often",
     )
+
+
+def read_height_parameter(parser):
     parser.add_argument(
         "--H",
         type=int,
         default=512,
         help="image height, in pixel space",
     )
+
+
+def read_width_parameter(parser):
     parser.add_argument(
         "--W",
         type=int,
         default=512,
         help="image width, in pixel space",
     )
+
+
+def read_latent_channels_parameter(parser):
     parser.add_argument(
         "--C",
         type=int,
         default=4,
         help="latent channels",
     )
+
+
+def read_downsampling_factor_parameter(parser):
     parser.add_argument(
         "--f",
         type=int,
         default=8,
         help="downsampling factor",
     )
+
+
+def read_n_samples_parameter(parser):
     parser.add_argument(
         "--n_samples",
         type=int,
         default=3,
         help="how many samples to produce for each given prompt. A.k.a. batch size",
     )
+
+
+def read_n_rows_parameter(parser):
     parser.add_argument(
         "--n_rows",
         type=int,
         default=0,
         help="rows in the grid (default: n_samples)",
     )
+
+
+def read_scale_parameter(parser):
     parser.add_argument(
         "--scale",
         type=float,
         default=7.5,
         help="unconditional guidance scale: eps = eps(x, empty) + scale * (eps(x, cond) - eps(x, empty))",
     )
+
+
+def read_from_file_parameter(parser):
     parser.add_argument(
         "--from-file",
         type=str,
         help="if specified, load prompts from this file",
     )
+
+
+def read_config_parameter(parser):
     parser.add_argument(
         "--config",
         type=str,
         default="configs/stable-diffusion/v1-inference.yaml",
         help="path to config which constructs model",
     )
+
+
+def read_ckpt_parameter(parser):
     parser.add_argument(
         "--ckpt",
         type=str,
         default="models/ldm/stable-diffusion-v1/model.ckpt",
         help="path to checkpoint of model",
     )
+
+
+def read_seed_parameter(parser):
     parser.add_argument(
         "--seed",
         type=int,
-        default=42,
+        default=randint(1, 4294967295),
         help="the seed (for reproducible sampling)",
     )
+
+
+def read_precision_parameter(parser):
     parser.add_argument(
         "--precision",
         type=str,
@@ -232,6 +300,34 @@ def main():
         choices=["full", "autocast"],
         default="autocast"
     )
+
+
+def main():
+    # Read parameters from command line
+    parser = argparse.ArgumentParser()
+    read_prompt_parameter(parser)
+    read_outdir_parameter(parser)
+    read_skip_grid_parameter(parser)
+    read_skip_save_parameter(parser)
+    read_ddim_steps_parameter(parser)
+    read_plms_parameter(parser)
+    read_dpm_solver_parameter(parser)
+    read_laion400m_parameter(parser)
+    read_fixed_code_parameter(parser)
+    read_ddim_eta_parameter(parser)
+    read_n_iter_parameter(parser)
+    read_height_parameter(parser)
+    read_width_parameter(parser)
+    read_latent_channels_parameter(parser)
+    read_downsampling_factor_parameter(parser)
+    read_n_samples_parameter(parser)
+    read_n_rows_parameter(parser)
+    read_scale_parameter(parser)
+    read_from_file_parameter(parser)
+    read_config_parameter(parser)
+    read_ckpt_parameter(parser)
+    read_seed_parameter(parser)
+    read_precision_parameter(parser)
     opt = parser.parse_args()
 
     if opt.laion400m:
@@ -247,6 +343,7 @@ def main():
 
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
     model = model.to(device)
+    model.half()
 
     if opt.dpm_solver:
         sampler = DPMSolverSampler(model)
@@ -310,11 +407,12 @@ def main():
                                                          eta=opt.ddim_eta,
                                                          x_T=start_code)
 
+
                         x_samples_ddim = model.decode_first_stage(samples_ddim)
                         x_samples_ddim = torch.clamp((x_samples_ddim + 1.0) / 2.0, min=0.0, max=1.0)
                         x_samples_ddim = x_samples_ddim.cpu().permute(0, 2, 3, 1).numpy()
 
-                        x_checked_image, has_nsfw_concept = check_safety(x_samples_ddim)
+                        x_checked_image, has_nsfw_concept = check_safety(False, x_samples_ddim)
 
                         x_checked_image_torch = torch.from_numpy(x_checked_image).permute(0, 3, 1, 2)
 
