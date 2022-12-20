@@ -99,6 +99,19 @@ def check_safety(nsfw_filter_switch, x_image):
         return x_image, False
 
 
+def resize_image(source_image, destination_image, width, height, resize_factor):
+    image_to_resize = cv2.imread(source_image)
+    resized_image = cv2.resize(image_to_resize, dsize=(width*resize_factor, height*resize_factor)
+                               , interpolation=cv2.INTER_LANCZOS4)
+    cv2.imwrite(destination_image, resized_image)
+
+
+def improve_image(source_image, destination_image):
+    image_to_improve = cv2.imread(source_image)
+    image_improved = cv2.detailEnhance(image_to_improve, sigma_s=200, sigma_r=0.01)
+    image_improved = cv2.edgePreservingFilter(image_improved, flags=1, sigma_s=60, sigma_r=0.3)
+    cv2.imwrite(destination_image, image_improved)
+
 def read_prompt_parameter(parser):
     parser.add_argument(
         "--prompt",
@@ -302,6 +315,24 @@ def read_precision_parameter(parser):
     )
 
 
+def read_nsfw_protection_parameter(parser):
+    parser.add_argument(
+        "--nsfw_protection",
+        type=int,
+        help="Deactivate/Activate nsfw protection",
+        default=0
+    )
+
+
+def read_resize_factor_parameter(parser):
+    parser.add_argument(
+        "--resize_factor",
+        type=int,
+        help="Resize factor",
+        default=2
+    )
+
+
 def main():
     # Read parameters from command line
     parser = argparse.ArgumentParser()
@@ -328,6 +359,8 @@ def main():
     read_ckpt_parameter(parser)
     read_seed_parameter(parser)
     read_precision_parameter(parser)
+    read_nsfw_protection_parameter(parser)
+    read_resize_factor_parameter(parser)
     opt = parser.parse_args()
 
     if opt.laion400m:
@@ -374,8 +407,13 @@ def main():
             data = list(chunk(data, batch_size))
 
     sample_path = os.path.join(outpath, "samples")
-    os.makedirs(sample_path, exist_ok=True)
-    base_count = len(os.listdir(sample_path))
+    # Folder with the original output
+    os.makedirs(os.path.join(sample_path, "original"), exist_ok=True)
+    # Folder with the resized output
+    os.makedirs(os.path.join(sample_path, "resized"), exist_ok=True)
+    # Folder with the improved output based on the resized output
+    os.makedirs(os.path.join(sample_path, "improved"), exist_ok=True)
+    base_count = len(os.listdir(os.path.join(sample_path, "original")))
     grid_count = len(os.listdir(outpath)) - 1
 
     start_code = None
@@ -412,7 +450,7 @@ def main():
                         x_samples_ddim = torch.clamp((x_samples_ddim + 1.0) / 2.0, min=0.0, max=1.0)
                         x_samples_ddim = x_samples_ddim.cpu().permute(0, 2, 3, 1).numpy()
 
-                        x_checked_image, has_nsfw_concept = check_safety(False, x_samples_ddim)
+                        x_checked_image, has_nsfw_concept = check_safety(bool(opt.nsfw_protection), x_samples_ddim)
 
                         x_checked_image_torch = torch.from_numpy(x_checked_image).permute(0, 3, 1, 2)
 
@@ -421,7 +459,12 @@ def main():
                                 x_sample = 255. * rearrange(x_sample.cpu().numpy(), 'c h w -> h w c')
                                 img = Image.fromarray(x_sample.astype(np.uint8))
                                 img = put_watermark(img, wm_encoder)
-                                img.save(os.path.join(sample_path, f"{base_count:05}.png"))
+                                img.save(os.path.join(sample_path, f"original\\{base_count:05}.png"))
+                                resize_image(os.path.join(sample_path, f"original\\{base_count:05}.png")
+                                             , os.path.join(sample_path, f"resized\\{base_count:05}.png")
+                                             , opt.W, opt.H, opt.resize_factor)
+                                improve_image(os.path.join(sample_path, f"resized\\{base_count:05}.png")
+                                              , os.path.join(sample_path, f"improved\\{base_count:05}.png"))
                                 base_count += 1
 
                         if not opt.skip_grid:
