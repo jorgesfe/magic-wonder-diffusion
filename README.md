@@ -32,6 +32,6 @@
 ```
 *The next examples are related to the original, resized, and improved version*
 
-![Vintage astronaut original](assets/examples/00001_original.png)
-![Vintage astronaut resized](assets/examples/00001_resized.png)!
-![Vintage astronaut improved](assets/examples/00001_improved.png)
+![Vintage astronaut original](assets/examples/00003_original.png)
+![Vintage astronaut resized](assets/examples/00003_resized.png)!
+![Vintage astronaut improved](assets/examples/00003_improved.png)
