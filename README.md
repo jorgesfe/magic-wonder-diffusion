@@ -14,7 +14,7 @@
 
 ## Roadmap
 *The next roadmap is one estimation, some new features can be added in a different order:*
-* Remove the invisible water mark.
+* Remove the invisible water mark. => 100% completed(Water mark protection is optional)
 * Modify img2img to allow half precision.
 * Add one cuda space control to activate half precision mode in computers with less VRAM.
 * Improve resize features.
