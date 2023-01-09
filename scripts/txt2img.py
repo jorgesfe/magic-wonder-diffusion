@@ -67,8 +67,8 @@ def load_model_from_config(config, ckpt, verbose=False):
     return model
 
 
-def put_watermark(img, wm_encoder=None):
-    if wm_encoder is not None:
+def put_watermark(watermark_protection, img, wm_encoder=None):
+    if watermark_protection and wm_encoder is not None:
         img = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
         img = wm_encoder.encode(img, 'dwtDct')
         img = Image.fromarray(img[:, :, ::-1])
@@ -333,6 +333,15 @@ def read_resize_factor_parameter(parser):
     )
 
 
+def read_watermark_protection_parameter(parser):
+    parser.add_argument(
+        "--watermark_protection",
+        type=int,
+        help="Deactivate/Activate watermark protection",
+        default=0
+    )
+
+
 def main():
     # Read parameters from command line
     parser = argparse.ArgumentParser()
@@ -361,6 +370,7 @@ def main():
     read_precision_parameter(parser)
     read_nsfw_protection_parameter(parser)
     read_resize_factor_parameter(parser)
+    read_watermark_protection_parameter(parser)
     opt = parser.parse_args()
 
     if opt.laion400m:
@@ -458,7 +468,7 @@ def main():
                             for x_sample in x_checked_image_torch:
                                 x_sample = 255. * rearrange(x_sample.cpu().numpy(), 'c h w -> h w c')
                                 img = Image.fromarray(x_sample.astype(np.uint8))
-                                img = put_watermark(img, wm_encoder)
+                                img = put_watermark(opt.watermark_protection, img, wm_encoder)
                                 img.save(os.path.join(sample_path, f"original\\{base_count:05}.png"))
                                 resize_image(os.path.join(sample_path, f"original\\{base_count:05}.png")
                                              , os.path.join(sample_path, f"resized\\{base_count:05}.png")
@@ -479,7 +489,7 @@ def main():
                     # to image
                     grid = 255. * rearrange(grid, 'c h w -> h w c').cpu().numpy()
                     img = Image.fromarray(grid.astype(np.uint8))
-                    img = put_watermark(img, wm_encoder)
+                    img = put_watermark(opt.watermark_protection, img, wm_encoder)
                     img.save(os.path.join(outpath, f'grid-{grid_count:04}.png'))
                     grid_count += 1
 
