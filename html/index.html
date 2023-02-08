@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Magic Wonderful Diffusion || Prompt Manager</title>
+  <link href="./libs/bootstrap.min.css" rel="stylesheet">
+  <link href="./css/PromptManager.css" rel="stylesheet">
+  <script src="./js/PromptManager.js"></script>
+</head>
+
+<body>
+  <nav class="navbar bg-dark" data-bs-theme="dark">
+    <a class="navbar-brand" href="#">&#128514; Prompt Manager</a>
+  </nav>
+  <div class="prompt-container d-flex">
+    <div class="prompt-form me-2">
+      <form id="prompt-manager-form">
+        <section class="simple-prompt d-flex mt-2">
+          <article class="input-group w-70 me-2">
+            <span class="input-group-text">Prompt</span>
+            <textarea id="prompt-field" class="form-control" aria-label="With textarea"
+              placeholder="WRITE SOMETHING"></textarea>
+          </article>
+          <article class="w-15 me-2">
+            <button type="submit" class="btn btn-primary" onclick="generatePrompt()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard"
+                viewBox="0 0 16 16">
+                <path
+                  d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z">
+                </path>
+                <path
+                  d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z">
+                </path>
+              </svg>
+              Copy
+            </button>
+          </article>
+          <article class="w-15 me-2">
+            <button type="button" class="btn btn-secondary" onclick="changeOptionsVisibility()">Options</button>
+          </article>
+        </section>
+        <section class="prompt-model-dir">
+          <p>
+          <div class="input-group">
+            <span class="input-group-text">Model</span>
+            <input id="model-field" class="form-control" type="text" placeholder="./REPLACE_ROUTE"
+              aria-label="default input example">
+          </div>
+          </p>
+        </section>
+        <section class="prompt-output-dir">
+          <p>
+          <div class="input-group">
+            <span class="input-group-text">Output dir</span>
+            <input id="outdir-field" class="form-control" type="text" placeholder="./REPLACE_ROUTE"
+              aria-label="default input example">
+          </div>
+          </p>
+        </section>
+        <section class="advance-form d-none">
+          <div class="me-2">
+            <div class="form-check">
+              <input id="skip-grid" class="form-check-input" type="checkbox" value="1">
+              <label class="form-check-label" for="skip-grid">
+                Create grid
+              </label>
+            </div>
+            <div class="form-check">
+              <input id="skip-save-field" class="form-check-input" type="checkbox" value="1" >
+              <label class="form-check-label" for="skip-save">
+                Skip save
+              </label>
+            </div>
+            <div class="form-check">
+              <input id="laion400-field" class="form-check-input" type="checkbox" value="1">
+              <label class="form-check-label" for="laion400">
+                Use model LAION400
+              </label>
+            </div>
+            <div class="form-check">
+              <input id="fixed-code-field" class="form-check-input" type="checkbox" value="1">
+              <label class="form-check-label" for="fixed-code">
+                Fixed code
+              </label>
+            </div>
+            <div class="form-check">
+              <input id="nsfw-protection-field" class="form-check-input" type="checkbox" value="1" id="nsfw-protection">
+              <label class="form-check-label" for="nsfw-protection">
+                NSFW protection
+              </label>
+            </div>
+            <div class="form-check">
+              <input id="watermark-protection-field" class="form-check-input" type="checkbox" value="1">
+              <label class="form-check-label" for="watermark-protection">
+                Watermark
+              </label>
+            </div>
+          </div>
+          <div class="me-2">
+            <div class="input-group mt-2">
+              <input id="seed-field" type="text" placeholder="Seed" />
+            </div>
+            <div class="input-group mt-2">
+              <input id="iterations-field" type="number" min="1" step="1" placeholder="Iterations" />
+            </div>
+            <div class="input-group mt-2">
+              <input id="steps-field" type="number" min="1" step="1" placeholder="Steps" />
+            </div>
+            <div class="input-group mt-2">
+              <input id="width-field" type="number" min="512" step="10" placeholder="Width" />
+            </div>
+            <div class="input-group mt-2">
+              <input id="height-field" type="number" min="512" step="10" placeholder="Height" />
+            </div>
+            <div class="input-group mt-2">
+              <input id="resize-field" type="number" min="1" step="1" placeholder="Resize factor" />
+            </div>
+          </div>
+          <div class="me-2">
+            <div class="form-check">
+              <input id="plms" class="form-check-input" type="radio" name="plms" checked>
+              <label class="form-check-label" for="plms">
+                PLMS
+              </label>
+            </div>
+            <div class="form-check">
+              <input id="dpm" class="form-check-input" type="radio" name="dpm">
+              <label class="form-check-label" for="dpm">
+                DPM Solver
+              </label>
+            </div>
+            <div class="form-check">
+              <input id="ddim" class="form-check-input" type="radio" name="ddim">
+              <label class="form-check-label" for="ddim">
+                DDIM
+              </label>
+            </div>
+          </div>
+        </section>
+      </form>
+    </div>
+    <div class="prompt-results-container">
+      <section class="prompt-results"></section>
+      <section class="prompt-results-buttons  d-flex mt-2">
+        <article class="me-2">
+          <button type="submit" class="btn btn-primary" onclick="copyToClipboard()">Copy all</button>
+        </article>
+        <article class="me-2">
+          <button type="button" class="btn btn-danger" onclick="removeAll()">Remove All</button>
+        </article>
+      </section>
+    </div>
+  </div>
+</body>
+
+</html>

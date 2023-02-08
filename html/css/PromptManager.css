@@ -1,0 +1,32 @@
+.w-70 {
+    width: 70%;
+}
+
+.w-15 {
+    width: 15%;
+}
+
+.prompt-container {
+    width: 90%;
+    margin: auto;
+}
+
+.prompt-form {
+    width: 70%;
+}
+
+.prompt-results-container {
+    width: 30%;
+    height: 30em;
+}
+
+.prompt-results {
+    height: 90%;
+    overflow: scroll;
+}
+
+.prompt-result {
+    border-radius: 0.5em;
+    font-size: 11px;
+    color: white;
+}
