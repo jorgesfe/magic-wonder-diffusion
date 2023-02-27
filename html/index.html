@@ -22,7 +22,7 @@
               placeholder="WRITE SOMETHING"></textarea>
           </article>
           <article class="w-15 me-2">
-            <button type="submit" class="btn btn-primary" onclick="generatePrompt()">
+            <button type="submit" class="btn btn-primary" onclick="generatePrompt(event)">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard"
                 viewBox="0 0 16 16">
                 <path
@@ -60,13 +60,13 @@
         <section class="advance-form d-none">
           <div class="me-2">
             <div class="form-check">
-              <input id="skip-grid" class="form-check-input" type="checkbox" value="1">
+              <input id="skip-grid-field" class="form-check-input" type="checkbox" value="1">
               <label class="form-check-label" for="skip-grid">
-                Create grid
+                Skip grid
               </label>
             </div>
             <div class="form-check">
-              <input id="skip-save-field" class="form-check-input" type="checkbox" value="1" >
+              <input id="skip-save-field" class="form-check-input" type="checkbox" value="1">
               <label class="form-check-label" for="skip-save">
                 Skip save
               </label>
@@ -113,28 +113,28 @@
               <input id="height-field" type="number" min="512" step="10" placeholder="Height" />
             </div>
             <div class="input-group mt-2">
-              <input id="resize-field" type="number" min="1" step="1" placeholder="Resize factor" />
+              <input id="resize-factor-field" type="number" min="1" step="1" placeholder="Resize factor" />
             </div>
           </div>
           <div class="me-2">
-            <div class="form-check">
-              <input id="plms" class="form-check-input" type="radio" name="plms" checked>
-              <label class="form-check-label" for="plms">
-                PLMS
-              </label>
-            </div>
-            <div class="form-check">
-              <input id="dpm" class="form-check-input" type="radio" name="dpm">
-              <label class="form-check-label" for="dpm">
-                DPM Solver
-              </label>
-            </div>
-            <div class="form-check">
-              <input id="ddim" class="form-check-input" type="radio" name="ddim">
-              <label class="form-check-label" for="ddim">
-                DDIM
-              </label>
-            </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="sampler-field" value="plms" checked>
+                <label class="form-check-label" for="plms">
+                  PLMS
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="sampler-field" value="dpm_solver">
+                <label class="form-check-label" for="dpm-solver">
+                  DPM Solver
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="sampler-field" value="ddim">
+                <label class="form-check-label" for="ddim">
+                  DDIM
+                </label>
+              </div>
           </div>
         </section>
       </form>

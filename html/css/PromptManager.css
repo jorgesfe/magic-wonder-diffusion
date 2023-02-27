@@ -29,4 +29,9 @@
     border-radius: 0.5em;
     font-size: 11px;
     color: white;
+    background-color:darkolivegreen;
+}
+
+.prompt-result:nth-child(1) {
+    background-color: darkgreen;
 }
