@@ -9,21 +9,19 @@
 ## ¿How to use it?
 *All the parameters from stable diffusion are compatible, Magic Wonder Difussion has the next own parameters:*
 * --resize(Default 2): The upscale factor for the resized and improved version
+* --nsfw_protection(default 0): Non safe for work flag
+* --watermark_protection(default 0): Watermark flag
 
 *NOTE: The output in Magic Wonder Difussion is in three folders; original, resized, and improved*
 
 ## Roadmap
 *The next roadmap is one estimation, some new features can be added in a different order:*
-* Remove the invisible water mark. => 100% completed(Water mark protection is optional)
-* Modify img2img to allow half precision.
-* Add one cuda space control to activate half precision mode in computers with less VRAM.
-* Improve resize features.
-* Add one video2img feature.
-* Add one dictionary to control prompts.
-  * Stable Diffusion V2 uses the model, which is very intrusive. We will use one ban dictionary, You are not a child!
-* Create one original model for Magic Wonder Diffusion.
-* Create one basic user friendly UI.
-  * Complex UI will be one isolate project.
+* Modify img2img to allow half precision => February-March
+* Add one video2img feature. => February-March-May
+* Create one basic user friendly UI => May
+* Improve resize features => Unknow
+* Add one dictionary to control prompts => Unknow
+* Create one original model for Magic Wonder Diffusion => Unknow
 * ;)
 
 ## Examples
