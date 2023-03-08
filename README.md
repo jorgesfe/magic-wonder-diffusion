@@ -18,8 +18,8 @@
 *The next roadmap is one estimation, some new features can be added in a different order:*
 * Modify img2img to allow half precision => February-March
 * Add one video2img feature. => February-March-May
-* Create one basic user friendly UI => May
-* Improve resize features => Unknow
+* Move resize code to the main aplication, magic-wonder-diffusion => May
+* Prepare software to be one isolate module => May
 * Add one dictionary to control prompts => Unknow
 * Create one original model for Magic Wonder Diffusion => Unknow
 * ;)
